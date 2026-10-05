@@ -273,4 +273,4 @@ def update_tab3(active_tab):
     return dash.no_update
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)
