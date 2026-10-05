@@ -10,7 +10,6 @@ import pandas as pd
 # ==========================================
 
 # Tab 1 Data (Supply)
-# Replacing dummy data with trends based on the open data (graduates vs jobs)
 df_graduates = pd.DataFrame({
     'Year': [2020, 2021, 2022, 2023, 2024],
     'Program': ['All Tech Programs']*5,
@@ -22,7 +21,7 @@ df_employment = pd.DataFrame({
     'Program': ['All Tech Programs'],
     'Year_1': [75],
     'Year_2': [20],
-    'Year_3': [5] # percentages
+    'Year_3': [5]
 })
 
 df_courses = pd.DataFrame({
@@ -32,7 +31,7 @@ df_courses = pd.DataFrame({
     'Domain/Business': [30]
 })
 
-# Tab 2 Data (Demand) - Based on Real Data Provided
+# Tab 2 Data (Demand)
 df_demand_skills = pd.DataFrame([
     { "Skill": "Python", "Demand_Count": 82 },
     { "Skill": "SQL", "Demand_Count": 75 },
@@ -70,31 +69,41 @@ df_mismatch['Mismatch'] = df_mismatch['Demand_Weight'] - df_mismatch['Supply_Wei
 
 
 # ==========================================
-# 2. App Initialization
+# 2. App Initialization & Global Styles
 # ==========================================
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 app.title = "AI & DS Talent Dashboard"
+
+# Reusable dark theme layout for Plotly
+def apply_dark_theme(fig):
+    fig.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#9CA3AF'),
+        xaxis=dict(showgrid=False, showline=False, zeroline=False),
+        yaxis=dict(showgrid=True, gridcolor='#3F3F46', gridwidth=1, griddash='dot', showline=False, zeroline=False),
+        margin=dict(l=40, r=20, t=50, b=40),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    return fig
 
 # ==========================================
 # 3. Layout Definitions
 # ==========================================
-
-# Footer with Data Sources
 data_sources_footer = html.Div([
-    html.Hr(),
-    html.H6("Data Sources & References:", className="fw-bold"),
+    html.Hr(style={"borderColor": "#3F3F46"}),
+    html.H6("Data Sources & References:", className="fw-bold text-white"),
     html.Ul([
-        html.Li(html.A("Stanford AI Index Report Dataset", href="https://github.com/ai-index-hai-stanford/", target="_blank")),
-        html.Li(html.A("Data Science, AI & ML Job Salaries (Kaggle)", href="https://www.kaggle.com/datasets/adilshamim8/salaries-for-data-science-jobs/data", target="_blank")),
-        html.Li(html.A("AI & Data Job Market Roles & Skills (Kaggle)", href="https://www.kaggle.com/datasets/anujsaha0123456789/ai-and-data-job-market-2023-roles-skills-and", target="_blank")),
-        html.Li(html.A("U.S. Bureau of Labor Statistics (BLS) - Occupational Employment", href="https://www.bls.gov/ooh/math/data-scientists.htm", target="_blank"))
+        html.Li(html.A("Stanford AI Index Report Dataset", href="https://github.com/ai-index-hai-stanford/", target="_blank", className="text-muted")),
+        html.Li(html.A("Data Science, AI & ML Job Salaries (Kaggle)", href="https://www.kaggle.com/datasets/adilshamim8/salaries-for-data-science-jobs/data", target="_blank", className="text-muted")),
+        html.Li(html.A("AI & Data Job Market Roles & Skills (Kaggle)", href="https://www.kaggle.com/datasets/anujsaha0123456789/ai-and-data-job-market-2023-roles-skills-and", target="_blank", className="text-muted")),
+        html.Li(html.A("U.S. Bureau of Labor Statistics (BLS)", href="https://www.bls.gov/ooh/math/data-scientists.htm", target="_blank", className="text-muted"))
     ])
-], className="mt-5 mb-3 text-muted")
+], className="mt-5 mb-3")
 
-# Tab 1 Layout (Supply)
 tab1_content = dbc.Card(
     dbc.CardBody([
-        html.H4("Educational Pipeline (Supply)", className="card-title"),
+        html.H4("Educational Pipeline (Supply)", className="card-title text-white mb-4"),
         dbc.Row([
             dbc.Col([
                 html.Label("Filter by Program:"),
@@ -107,7 +116,6 @@ tab1_content = dbc.Card(
                 )
             ], width=4)
         ], className="mb-4"),
-        
         dbc.Row([
             dbc.Col(dcc.Graph(id='fig1-graduates'), md=6),
             dbc.Col(dcc.Graph(id='fig1-employment'), md=6),
@@ -118,13 +126,12 @@ tab1_content = dbc.Card(
         ]),
         data_sources_footer
     ]),
-    className="mt-3"
+    className="mt-3 border-0"
 )
 
-# Tab 2 Layout (Demand)
 tab2_content = dbc.Card(
     dbc.CardBody([
-        html.H4("Market Demand", className="card-title"),
+        html.H4("Market Demand", className="card-title text-white mb-4"),
         dbc.Row([
             dbc.Col([
                 html.Label("Filter by Role:"),
@@ -137,7 +144,6 @@ tab2_content = dbc.Card(
                 )
             ], width=4)
         ], className="mb-4"),
-        
         dbc.Row([
             dbc.Col(dcc.Graph(id='fig2-openings'), md=6),
             dbc.Col(dcc.Graph(id='fig2-salary'), md=6),
@@ -148,52 +154,45 @@ tab2_content = dbc.Card(
         ]),
         data_sources_footer
     ]),
-    className="mt-3"
+    className="mt-3 border-0"
 )
 
-# Tab 3 Layout (Gap Analysis)
 tab3_content = dbc.Card(
     dbc.CardBody([
-        html.H4("Skill Mismatch (Gap Analysis)", className="card-title"),
+        html.H4("Skill Mismatch (Gap Analysis)", className="card-title text-white mb-4"),
         dbc.Row([
             dbc.Col(dcc.Graph(id='fig3-radar'), md=6),
             dbc.Col([
-                html.H5("Mismatch Details (Positive = Undersupplied, Negative = Oversupplied)"),
+                html.H5("Mismatch Details (Positive = Undersupplied)", className="text-white"),
                 dash_table.DataTable(
                     id='fig3-table',
                     columns=[{"name": i, "id": i} for i in df_mismatch.columns],
                     data=df_mismatch.to_dict('records'),
-                    style_cell={'textAlign': 'left', 'padding': '10px'},
-                    style_header={
-                        'backgroundColor': 'rgb(230, 230, 230)',
-                        'fontWeight': 'bold'
-                    },
+                    style_table={'borderRadius': '10px', 'overflow': 'hidden'},
                     sort_action='native'
                 )
             ], md=6),
         ]),
         data_sources_footer
     ]),
-    className="mt-3"
+    className="mt-3 border-0"
 )
 
 app.layout = dbc.Container([
-    html.H2("AI & Data Science Talent Supply vs. Market Demand", className="mt-4 mb-4 text-center"),
+    html.H2("AI & Data Science Talent Supply vs. Market Demand", className="mt-4 mb-4 text-center text-white fw-light"),
     dbc.Tabs([
         dbc.Tab(tab1_content, label="Supply (Educational Pipeline)", tab_id="tab-1"),
         dbc.Tab(tab2_content, label="Demand (Market Requirements)", tab_id="tab-2"),
         dbc.Tab(tab3_content, label="Gap Analysis", tab_id="tab-3"),
-    ], id="tabs", active_tab="tab-1")
-], fluid=True)
+    ], id="tabs", active_tab="tab-1", className="nav-pills")
+], fluid=True, className="p-4")
 
 # ==========================================
 # 4. Callbacks for Tab 1
 # ==========================================
 @app.callback(
-    [Output('fig1-graduates', 'figure'),
-     Output('fig1-employment', 'figure'),
-     Output('fig1-courses', 'figure'),
-     Output('fig1-tuition', 'figure')],
+    [Output('fig1-graduates', 'figure'), Output('fig1-employment', 'figure'),
+     Output('fig1-courses', 'figure'), Output('fig1-tuition', 'figure')],
     [Input('tab1-program-filter', 'value')]
 )
 def update_tab1(selected_program):
@@ -201,47 +200,49 @@ def update_tab1(selected_program):
     d_emp = df_employment if not selected_program else df_employment[df_employment['Program'] == selected_program]
     d_course = df_courses if not selected_program else df_courses[df_courses['Program'] == selected_program]
     
-    fig_grad = px.line(d_grad, x='Year', y='Graduates', color='Program', markers=True, title='Graduates by Program (2020-2024)')
+    # Neon green line chart
+    fig_grad = px.line(d_grad, x='Year', y='Graduates', color_discrete_sequence=['#D4FF32'], title='Graduates (2020-2024)')
+    fig_grad.update_traces(line_shape='spline', mode='lines+markers')
     
+    # Purple bar chart
     d_emp_melt = d_emp.melt(id_vars=['Program'], value_vars=['Year_1', 'Year_2', 'Year_3'], var_name='Year_After', value_name='Percentage')
-    fig_emp = px.bar(d_emp_melt, x='Program', y='Percentage', color='Year_After', title='Employment Rate Post-Graduation (%)')
+    fig_emp = px.bar(d_emp_melt, x='Program', y='Percentage', color='Year_After', color_discrete_sequence=['#8B5CF6', '#A855F7', '#C084FC'], title='Employment Rate (%)')
     
     d_course_melt = d_course.melt(id_vars=['Program'], value_vars=['Math/Stats', 'Programming', 'Domain/Business'], var_name='Subject', value_name='Weight')
-    fig_course = px.bar(d_course_melt, x='Program', y='Weight', color='Subject', barmode='group', title='Course Distribution by Subject Area')
+    fig_course = px.bar(d_course_melt, x='Program', y='Weight', color='Subject', barmode='group', color_discrete_sequence=['#8B5CF6', '#A855F7', '#C084FC'], title='Course Distribution')
     
     fig_tuit = px.bar(d_grad.groupby('Program')['Tuition_Fee_THB'].mean().reset_index(), 
-                      x='Program', y='Tuition_Fee_THB', title='Average Tuition Fees (THB)', color='Program')
+                      x='Program', y='Tuition_Fee_THB', color_discrete_sequence=['#8B5CF6'], title='Average Tuition Fees (THB)')
                       
-    return fig_grad, fig_emp, fig_course, fig_tuit
+    return apply_dark_theme(fig_grad), apply_dark_theme(fig_emp), apply_dark_theme(fig_course), apply_dark_theme(fig_tuit)
 
 # ==========================================
 # 5. Callbacks for Tab 2
 # ==========================================
 @app.callback(
-    [Output('fig2-openings', 'figure'),
-     Output('fig2-salary', 'figure'),
-     Output('fig2-skills', 'figure'),
-     Output('fig2-companies', 'figure')],
+    [Output('fig2-openings', 'figure'), Output('fig2-salary', 'figure'),
+     Output('fig2-skills', 'figure'), Output('fig2-companies', 'figure')],
     [Input('tab2-role-filter', 'value')]
 )
 def update_tab2(selected_role):
     d_open = df_openings if not selected_role else df_openings[df_openings['Role'] == selected_role]
     d_sal = df_salary if not selected_role else df_salary[df_salary['Role'] == selected_role]
     
-    fig_open = px.line(d_open, x='Year', y='Openings', color='Role', markers=True, title='Job Openings over Time')
+    # Neon green spline
+    fig_open = px.line(d_open, x='Year', y='Openings', color_discrete_sequence=['#D4FF32'], title='Job Openings over Time')
+    fig_open.update_traces(line_shape='spline', mode='lines+markers')
     
-    # Check if 'Executive' is present, otherwise just 'Entry', 'Mid', 'Senior'
     salary_levels = [col for col in ['Entry', 'Mid', 'Senior', 'Executive'] if col in d_sal.columns]
     d_sal_melt = d_sal.melt(id_vars=['Role'], value_vars=salary_levels, var_name='Level', value_name='Salary ($)')
-    fig_sal = px.bar(d_sal_melt, x='Role', y='Salary ($)', color='Level', barmode='group', title='Salary Ranges by Experience Level')
+    fig_sal = px.bar(d_sal_melt, x='Role', y='Salary ($)', color='Level', barmode='group', color_discrete_sequence=['#8B5CF6', '#A855F7', '#C084FC', '#D8B4FE'], title='Salary by Experience')
     
     fig_skills = px.bar(df_demand_skills.sort_values('Demand_Count', ascending=True), 
-                        x='Demand_Count', y='Skill', orientation='h', title='Top Required Skills (%)')
+                        x='Demand_Count', y='Skill', orientation='h', color_discrete_sequence=['#8B5CF6'], title='Top Required Skills (%)')
                         
     fig_comp = px.bar(df_companies.sort_values('Open_Roles', ascending=False), 
-                      x='Company', y='Open_Roles', title='Top Hiring Companies (Sample Vacancies)')
+                      x='Company', y='Open_Roles', color_discrete_sequence=['#8B5CF6'], title='Top Hiring Companies (Vacancies)')
                       
-    return fig_open, fig_sal, fig_skills, fig_comp
+    return apply_dark_theme(fig_open), apply_dark_theme(fig_sal), apply_dark_theme(fig_skills), apply_dark_theme(fig_comp)
 
 # ==========================================
 # 6. Callbacks/Figures for Tab 3
@@ -257,16 +258,23 @@ def update_tab3(active_tab):
             r=df_mismatch['Supply_Weight'].tolist() + [df_mismatch['Supply_Weight'].tolist()[0]],
             theta=df_mismatch['Skill'].tolist() + [df_mismatch['Skill'].tolist()[0]],
             fill='toself',
-            name='Supply (Education)'
+            name='Supply (Education)',
+            line_color='#8B5CF6'
         ))
         fig.add_trace(go.Scatterpolar(
             r=df_mismatch['Demand_Weight'].tolist() + [df_mismatch['Demand_Weight'].tolist()[0]],
             theta=df_mismatch['Skill'].tolist() + [df_mismatch['Skill'].tolist()[0]],
             fill='toself',
-            name='Demand (Market)'
+            name='Demand (Market)',
+            line_color='#D4FF32'
         ))
+        fig = apply_dark_theme(fig)
         fig.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+            polar=dict(
+                bgcolor='rgba(0,0,0,0)',
+                radialaxis=dict(visible=True, range=[0, 100], gridcolor='#3F3F46'),
+                angularaxis=dict(gridcolor='#3F3F46')
+            ),
             title='Skill Supply vs Demand'
         )
         return fig

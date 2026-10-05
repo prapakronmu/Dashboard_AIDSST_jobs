@@ -1,0 +1,96 @@
+/* Global Theme & Color Palette */
+body {
+    background-color: #0C0C0E;
+    color: #F3F4F6;
+    font-family: 'Inter', 'SF Pro Display', 'Roboto', sans-serif;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: #FFFFFF;
+    font-weight: 400;
+}
+.text-muted {
+    color: #9CA3AF !important;
+}
+label {
+    color: #9CA3AF;
+}
+
+/* Cards & Containers */
+.card {
+    background-color: #1C1C1E;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation & Tabs (Pill Shapes) */
+.nav-tabs {
+    border-bottom: none;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.nav-tabs .nav-link {
+    background-color: #27272A;
+    color: #9CA3AF;
+    border-radius: 50px;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #FFFFFF;
+    background-color: #3F3F46;
+    border: none;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    border: none;
+}
+
+/* Dropdown override */
+.Select-control {
+    background-color: #27272A !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+    border-radius: 50px !important;
+}
+
+.Select-value-label {
+    color: #FFFFFF !important;
+}
+
+.Select-menu-outer {
+    background-color: #27272A !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.Select-option {
+    background-color: #27272A !important;
+    color: #9CA3AF !important;
+}
+.Select-option.is-focused, .Select-option:hover {
+    background-color: #3F3F46 !important;
+    color: #FFFFFF !important;
+}
+
+/* DataTable Override */
+.dash-spreadsheet-container .dash-table-container .dash-spreadsheet-inner th {
+    background-color: #27272A !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-bottom: 1px solid #3F3F46 !important;
+}
+
+.dash-spreadsheet-container .dash-table-container .dash-spreadsheet-inner td {
+    background-color: #1C1C1E !important;
+    color: #9CA3AF !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
