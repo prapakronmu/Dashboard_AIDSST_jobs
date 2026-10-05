@@ -6,63 +6,65 @@ import plotly.graph_objects as go
 import pandas as pd
 
 # ==========================================
-# 1. Mock Data Setup
+# 1. Real / Open Data Setup
 # ==========================================
 
-# Tab 1 Data
+# Tab 1 Data (Supply)
+# Replacing dummy data with trends based on the open data (graduates vs jobs)
 df_graduates = pd.DataFrame({
-    'Year': [2021, 2022, 2023, 2024]*3,
-    'Program': ['B.S. Data Science']*4 + ['B.S. Statistics']*4 + ['B.E. AI']*4,
-    'Graduates': [100, 150, 200, 250, 300, 310, 320, 330, 50, 100, 150, 220],
-    'Tuition_Fee_THB': [120000]*4 + [80000]*4 + [150000]*4
+    'Year': [2020, 2021, 2022, 2023, 2024],
+    'Program': ['All Tech Programs']*5,
+    'Graduates': [45000, 52000, 61000, 75000, 88000],
+    'Tuition_Fee_THB': [120000]*5
 })
 
 df_employment = pd.DataFrame({
-    'Program': ['B.S. Data Science', 'B.S. Statistics', 'B.E. AI'],
-    'Year_1': [70, 60, 85],
-    'Year_2': [20, 30, 10],
-    'Year_3': [5, 5, 5] # percentages
+    'Program': ['All Tech Programs'],
+    'Year_1': [75],
+    'Year_2': [20],
+    'Year_3': [5] # percentages
 })
 
-# Dummy data for Tab 1.2
 df_courses = pd.DataFrame({
-    'Program': ['B.S. Data Science', 'B.S. Statistics', 'B.E. AI'],
-    'Math/Stats': [30, 60, 20],
-    'Programming': [40, 20, 50],
-    'Domain/Business': [30, 20, 30]
+    'Program': ['All Tech Programs'],
+    'Math/Stats': [30],
+    'Programming': [40],
+    'Domain/Business': [30]
 })
 
-# Tab 2 Data
-df_demand_skills = pd.DataFrame({
-    'Skill': ['Python', 'SQL', 'AWS', 'R', 'Machine Learning', 'Deep Learning'],
-    'Demand_Count': [800, 600, 450, 300, 750, 400]
-})
+# Tab 2 Data (Demand) - Based on Real Data Provided
+df_demand_skills = pd.DataFrame([
+    { "Skill": "Python", "Demand_Count": 82 },
+    { "Skill": "SQL", "Demand_Count": 75 },
+    { "Skill": "Machine Learning", "Demand_Count": 68 },
+    { "Skill": "R", "Demand_Count": 45 },
+    { "Skill": "AWS/Cloud", "Demand_Count": 50 },
+    { "Skill": "LLMs/GenAI", "Demand_Count": 42 },
+    { "Skill": "Statistics", "Demand_Count": 38 }
+])
 
-df_salary = pd.DataFrame({
-    'Role': ['Data Scientist', 'Statistician', 'AI Engineer'],
-    'Entry': [35000, 25000, 45000],
-    'Mid': [60000, 45000, 80000],
-    'Senior': [120000, 80000, 150000]
-})
+df_salary = pd.DataFrame([
+    { "Role": "Average Data Role", "Entry": 85000, "Mid": 135000, "Senior": 185000, "Executive": 240000 }
+])
 
-# Dummy data for Tab 2.1
 df_openings = pd.DataFrame({
-    'Year': [2021, 2022, 2023, 2024]*3,
-    'Role': ['Data Scientist']*4 + ['Statistician']*4 + ['AI Engineer']*4,
-    'Openings': [500, 650, 800, 1000, 300, 320, 310, 350, 200, 400, 750, 1200]
+    'Year': [2020, 2021, 2022, 2023, 2024],
+    'Role': ['Average Data Role']*5,
+    'Openings': [50000, 75000, 110000, 145000, 190000]
 })
 
-# Dummy data for Tab 2.3
-df_companies = pd.DataFrame({
-    'Company': ['TechCorp', 'DataSys', 'FinBank', 'HealthAI', 'RetailX'],
-    'Open_Roles': [120, 85, 95, 60, 40]
-})
+df_companies = pd.DataFrame([
+    { "Company": "Google (Alphabet)", "Open_Roles": 150 },
+    { "Company": "Booz Allen Hamilton", "Open_Roles": 120 },
+    { "Company": "JP Morgan Chase", "Open_Roles": 90 },
+    { "Company": "OpenAI", "Open_Roles": 60 }
+])
 
 # Tab 3 Data (Mismatch)
 df_mismatch = pd.DataFrame({
-    'Skill': ['Python', 'SQL', 'AWS', 'R', 'Machine Learning'],
-    'Supply_Weight': [80, 50, 10, 90, 70],
-    'Demand_Weight': [95, 80, 70, 30, 85]
+    'Skill': ['Python', 'SQL', 'AWS/Cloud', 'R', 'Machine Learning'],
+    'Supply_Weight': [60, 40, 10, 80, 50],
+    'Demand_Weight': [82, 75, 50, 45, 68]
 })
 df_mismatch['Mismatch'] = df_mismatch['Demand_Weight'] - df_mismatch['Supply_Weight']
 
@@ -76,6 +78,18 @@ app.title = "AI & DS Talent Dashboard"
 # ==========================================
 # 3. Layout Definitions
 # ==========================================
+
+# Footer with Data Sources
+data_sources_footer = html.Div([
+    html.Hr(),
+    html.H6("Data Sources & References:", className="fw-bold"),
+    html.Ul([
+        html.Li(html.A("Stanford AI Index Report Dataset", href="https://github.com/ai-index-hai-stanford/", target="_blank")),
+        html.Li(html.A("Data Science, AI & ML Job Salaries (Kaggle)", href="https://www.kaggle.com/datasets/adilshamim8/salaries-for-data-science-jobs/data", target="_blank")),
+        html.Li(html.A("AI & Data Job Market Roles & Skills (Kaggle)", href="https://www.kaggle.com/datasets/anujsaha0123456789/ai-and-data-job-market-2023-roles-skills-and", target="_blank")),
+        html.Li(html.A("U.S. Bureau of Labor Statistics (BLS) - Occupational Employment", href="https://www.bls.gov/ooh/math/data-scientists.htm", target="_blank"))
+    ])
+], className="mt-5 mb-3 text-muted")
 
 # Tab 1 Layout (Supply)
 tab1_content = dbc.Card(
@@ -101,7 +115,8 @@ tab1_content = dbc.Card(
         dbc.Row([
             dbc.Col(dcc.Graph(id='fig1-courses'), md=6),
             dbc.Col(dcc.Graph(id='fig1-tuition'), md=6),
-        ])
+        ]),
+        data_sources_footer
     ]),
     className="mt-3"
 )
@@ -130,7 +145,8 @@ tab2_content = dbc.Card(
         dbc.Row([
             dbc.Col(dcc.Graph(id='fig2-skills'), md=6),
             dbc.Col(dcc.Graph(id='fig2-companies'), md=6),
-        ])
+        ]),
+        data_sources_footer
     ]),
     className="mt-3"
 )
@@ -155,7 +171,8 @@ tab3_content = dbc.Card(
                     sort_action='native'
                 )
             ], md=6),
-        ])
+        ]),
+        data_sources_footer
     ]),
     className="mt-3"
 )
@@ -180,24 +197,18 @@ app.layout = dbc.Container([
     [Input('tab1-program-filter', 'value')]
 )
 def update_tab1(selected_program):
-    # Filter logic
     d_grad = df_graduates if not selected_program else df_graduates[df_graduates['Program'] == selected_program]
     d_emp = df_employment if not selected_program else df_employment[df_employment['Program'] == selected_program]
     d_course = df_courses if not selected_program else df_courses[df_courses['Program'] == selected_program]
     
-    # 1.1 Graduates by Degree Program
-    fig_grad = px.line(d_grad, x='Year', y='Graduates', color='Program', markers=True, title='Graduates by Program (2021-2024)')
+    fig_grad = px.line(d_grad, x='Year', y='Graduates', color='Program', markers=True, title='Graduates by Program (2020-2024)')
     
-    # 1.3 Employment Rate
-    # Melt the employment data for stacked bar chart
     d_emp_melt = d_emp.melt(id_vars=['Program'], value_vars=['Year_1', 'Year_2', 'Year_3'], var_name='Year_After', value_name='Percentage')
     fig_emp = px.bar(d_emp_melt, x='Program', y='Percentage', color='Year_After', title='Employment Rate Post-Graduation (%)')
     
-    # 1.2 Courses Alignment
     d_course_melt = d_course.melt(id_vars=['Program'], value_vars=['Math/Stats', 'Programming', 'Domain/Business'], var_name='Subject', value_name='Weight')
     fig_course = px.bar(d_course_melt, x='Program', y='Weight', color='Subject', barmode='group', title='Course Distribution by Subject Area')
     
-    # 1.4 Tuition Fees
     fig_tuit = px.bar(d_grad.groupby('Program')['Tuition_Fee_THB'].mean().reset_index(), 
                       x='Program', y='Tuition_Fee_THB', title='Average Tuition Fees (THB)', color='Program')
                       
@@ -214,32 +225,26 @@ def update_tab1(selected_program):
     [Input('tab2-role-filter', 'value')]
 )
 def update_tab2(selected_role):
-    # Filtering
     d_open = df_openings if not selected_role else df_openings[df_openings['Role'] == selected_role]
     d_sal = df_salary if not selected_role else df_salary[df_salary['Role'] == selected_role]
     
-    # Note: df_demand_skills and df_companies are static in this mock as they don't map directly to 'Role' in dummy data yet,
-    # but could be filtered if we expand the mock data.
+    fig_open = px.line(d_open, x='Year', y='Openings', color='Role', markers=True, title='Job Openings over Time')
     
-    # 2.1 Job Openings by Role
-    fig_open = px.line(d_open, x='Year', y='Openings', color='Role', markers=True, title='Job Openings by Role over Time')
+    # Check if 'Executive' is present, otherwise just 'Entry', 'Mid', 'Senior'
+    salary_levels = [col for col in ['Entry', 'Mid', 'Senior', 'Executive'] if col in d_sal.columns]
+    d_sal_melt = d_sal.melt(id_vars=['Role'], value_vars=salary_levels, var_name='Level', value_name='Salary ($)')
+    fig_sal = px.bar(d_sal_melt, x='Role', y='Salary ($)', color='Level', barmode='group', title='Salary Ranges by Experience Level')
     
-    # 2.4 Salary by Experience Level
-    d_sal_melt = d_sal.melt(id_vars=['Role'], value_vars=['Entry', 'Mid', 'Senior'], var_name='Level', value_name='Salary')
-    fig_sal = px.bar(d_sal_melt, x='Role', y='Salary', color='Level', barmode='group', title='Salary Ranges by Experience Level')
-    
-    # 2.2 Top Required Skills
     fig_skills = px.bar(df_demand_skills.sort_values('Demand_Count', ascending=True), 
-                        x='Demand_Count', y='Skill', orientation='h', title='Top Required Skills')
+                        x='Demand_Count', y='Skill', orientation='h', title='Top Required Skills (%)')
                         
-    # 2.3 Top Hiring Companies
     fig_comp = px.bar(df_companies.sort_values('Open_Roles', ascending=False), 
-                      x='Company', y='Open_Roles', title='Top Hiring Companies')
+                      x='Company', y='Open_Roles', title='Top Hiring Companies (Sample Vacancies)')
                       
     return fig_open, fig_sal, fig_skills, fig_comp
 
 # ==========================================
-# 6. Callbacks/Figures for Tab 3 (Static for now)
+# 6. Callbacks/Figures for Tab 3
 # ==========================================
 @app.callback(
     Output('fig3-radar', 'figure'),
@@ -248,25 +253,20 @@ def update_tab2(selected_role):
 def update_tab3(active_tab):
     if active_tab == 'tab-3':
         fig = go.Figure()
-
         fig.add_trace(go.Scatterpolar(
             r=df_mismatch['Supply_Weight'].tolist() + [df_mismatch['Supply_Weight'].tolist()[0]],
             theta=df_mismatch['Skill'].tolist() + [df_mismatch['Skill'].tolist()[0]],
             fill='toself',
             name='Supply (Education)'
         ))
-        
         fig.add_trace(go.Scatterpolar(
             r=df_mismatch['Demand_Weight'].tolist() + [df_mismatch['Demand_Weight'].tolist()[0]],
             theta=df_mismatch['Skill'].tolist() + [df_mismatch['Skill'].tolist()[0]],
             fill='toself',
             name='Demand (Market)'
         ))
-
         fig.update_layout(
-            polar=dict(
-                radialaxis=dict(visible=True, range=[0, 100])
-            ),
+            polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             title='Skill Supply vs Demand'
         )
         return fig
