@@ -80,17 +80,4 @@ label {
     color: #FFFFFF !important;
 }
 
-/* DataTable Override */
-.dash-spreadsheet-container .dash-table-container .dash-spreadsheet-inner th {
-    background-color: #27272A !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    border-bottom: 1px solid #3F3F46 !important;
-}
 
-.dash-spreadsheet-container .dash-table-container .dash-spreadsheet-inner td {
-    background-color: #1C1C1E !important;
-    color: #9CA3AF !important;
-    border: none !important;
-    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-}
