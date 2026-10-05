@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Input, Output, dash_table
+from dash import dcc, html, Input, Output, dash_table, ctx
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
@@ -21,7 +21,7 @@ df_employment = pd.DataFrame({
     'Program': ['Data Science', 'Statistics', 'AI Engineering'],
     'Year_1': [75, 65, 85],
     'Year_2': [15, 25, 10],
-    'Year_3': [5, 5, 2] # percentages
+    'Year_3': [5, 5, 2]
 })
 
 df_courses = pd.DataFrame({
@@ -31,15 +31,22 @@ df_courses = pd.DataFrame({
     'Domain/Business': [30, 15, 30]
 })
 
-# Tab 2 Data (Demand)
+# Tab 2 Data (Demand) - Now enhanced with Role breakdown for filtering
 df_demand_skills = pd.DataFrame([
-    { "Skill": "Python", "Demand_Count": 82 },
-    { "Skill": "SQL", "Demand_Count": 75 },
-    { "Skill": "Machine Learning", "Demand_Count": 68 },
-    { "Skill": "AWS/Cloud", "Demand_Count": 50 },
-    { "Skill": "R", "Demand_Count": 45 },
-    { "Skill": "LLMs/GenAI", "Demand_Count": 42 },
-    { "Skill": "Statistics", "Demand_Count": 38 }
+    { "Role": "Data Scientist", "Skill": "Python", "Demand_Count": 85 },
+    { "Role": "Data Scientist", "Skill": "SQL", "Demand_Count": 80 },
+    { "Role": "Data Scientist", "Skill": "Machine Learning", "Demand_Count": 75 },
+    { "Role": "Data Scientist", "Skill": "R", "Demand_Count": 60 },
+    
+    { "Role": "Statistician", "Skill": "R", "Demand_Count": 85 },
+    { "Role": "Statistician", "Skill": "Statistics", "Demand_Count": 90 },
+    { "Role": "Statistician", "Skill": "Python", "Demand_Count": 50 },
+    { "Role": "Statistician", "Skill": "SQL", "Demand_Count": 45 },
+    
+    { "Role": "AI Engineer", "Skill": "Python", "Demand_Count": 95 },
+    { "Role": "AI Engineer", "Skill": "Machine Learning", "Demand_Count": 90 },
+    { "Role": "AI Engineer", "Skill": "AWS/Cloud", "Demand_Count": 80 },
+    { "Role": "AI Engineer", "Skill": "LLMs/GenAI", "Demand_Count": 75 }
 ])
 
 df_salary = pd.DataFrame({
@@ -57,11 +64,12 @@ df_openings = pd.DataFrame({
 })
 
 df_companies = pd.DataFrame([
-    { "Company": "Google (Alphabet)", "Open_Roles": 150 },
-    { "Company": "Meta", "Open_Roles": 135 },
-    { "Company": "Booz Allen Hamilton", "Open_Roles": 120 },
-    { "Company": "JP Morgan Chase", "Open_Roles": 90 },
-    { "Company": "OpenAI", "Open_Roles": 60 }
+    { "Role": "Data Scientist", "Company": "Meta", "Open_Roles": 60 },
+    { "Role": "Data Scientist", "Company": "Google (Alphabet)", "Open_Roles": 50 },
+    { "Role": "Statistician", "Company": "Booz Allen Hamilton", "Open_Roles": 80 },
+    { "Role": "Statistician", "Company": "JP Morgan Chase", "Open_Roles": 50 },
+    { "Role": "AI Engineer", "Company": "OpenAI", "Open_Roles": 60 },
+    { "Role": "AI Engineer", "Company": "Google (Alphabet)", "Open_Roles": 100 }
 ])
 
 # Tab 3 Data (Mismatch)
@@ -110,7 +118,7 @@ tab1_content = dbc.Card(
         html.H4("Educational Pipeline (Supply)", className="card-title text-white mb-4 fw-light"),
         dbc.Row([
             dbc.Col([
-                html.Label("Filter by Program:"),
+                html.Label("Filter by Program (Click any graph to filter):"),
                 dcc.Dropdown(
                     id='tab1-program-filter',
                     options=[{'label': p, 'value': p} for p in df_graduates['Program'].unique()],
@@ -139,7 +147,7 @@ tab2_content = dbc.Card(
         html.H4("Market Demand", className="card-title text-white mb-4 fw-light"),
         dbc.Row([
             dbc.Col([
-                html.Label("Filter by Role:"),
+                html.Label("Filter by Role (Click any graph to filter):"),
                 dcc.Dropdown(
                     id='tab2-role-filter',
                     options=[{'label': r, 'value': r} for r in df_salary['Role'].unique()],
@@ -208,7 +216,41 @@ app.layout = dbc.Container([
 ], fluid=True, className="px-5")
 
 # ==========================================
-# 4. Callbacks for Tab 1
+# 4. Cross-Filtering Callbacks (Click to Dropdown)
+# ==========================================
+@app.callback(
+    Output('tab1-program-filter', 'value'),
+    [Input('fig1-graduates', 'clickData'),
+     Input('fig1-employment', 'clickData'),
+     Input('fig1-courses', 'clickData'),
+     Input('fig1-tuition', 'clickData')]
+)
+def tab1_cross_filter(clk1, clk2, clk3, clk4):
+    trigger = ctx.triggered_id
+    if trigger == 'fig1-graduates' and clk1:
+        return clk1['points'][0]['customdata'][0]
+    elif trigger in ['fig1-employment', 'fig1-courses', 'fig1-tuition']:
+        clk = clk2 if trigger == 'fig1-employment' else (clk3 if trigger == 'fig1-courses' else clk4)
+        if clk:
+            return clk['points'][0]['x']
+    return dash.no_update
+
+@app.callback(
+    Output('tab2-role-filter', 'value'),
+    [Input('fig2-openings', 'clickData'),
+     Input('fig2-salary', 'clickData')]
+)
+def tab2_cross_filter(clk1, clk2):
+    trigger = ctx.triggered_id
+    if trigger == 'fig2-openings' and clk1:
+        return clk1['points'][0]['customdata'][0]
+    elif trigger == 'fig2-salary' and clk2:
+        return clk2['points'][0]['x']
+    return dash.no_update
+
+
+# ==========================================
+# 5. Render Callbacks for Tab 1
 # ==========================================
 @app.callback(
     [Output('fig1-graduates', 'figure'), Output('fig1-employment', 'figure'),
@@ -220,12 +262,10 @@ def update_tab1(selected_program):
     d_emp = df_employment if not selected_program else df_employment[df_employment['Program'] == selected_program]
     d_course = df_courses if not selected_program else df_courses[df_courses['Program'] == selected_program]
     
-    # Neon green line chart
     colors_line = ['#D4FF32', '#34D399', '#60A5FA']
-    fig_grad = px.line(d_grad, x='Year', y='Graduates', color='Program', color_discrete_sequence=colors_line, title='Graduates Trend (2021-2024)')
+    fig_grad = px.line(d_grad, x='Year', y='Graduates', color='Program', custom_data=['Program'], color_discrete_sequence=colors_line, title='Graduates Trend (2021-2024)')
     fig_grad.update_traces(line_shape='spline', mode='lines+markers', marker=dict(size=8, line=dict(width=2, color='DarkSlateGrey')))
     
-    # Purple bar chart
     d_emp_melt = d_emp.melt(id_vars=['Program'], value_vars=['Year_1', 'Year_2', 'Year_3'], var_name='Year_After', value_name='Percentage')
     fig_emp = px.bar(d_emp_melt, x='Program', y='Percentage', color='Year_After', barmode='group', color_discrete_sequence=['#8B5CF6', '#A855F7', '#C084FC'], title='Employment Rate (%)')
     fig_emp.update_traces(marker_line_width=0, opacity=0.9)
@@ -242,7 +282,7 @@ def update_tab1(selected_program):
     return apply_dark_theme(fig_grad), apply_dark_theme(fig_emp), apply_dark_theme(fig_course), apply_dark_theme(fig_tuit)
 
 # ==========================================
-# 5. Callbacks for Tab 2
+# 6. Render Callbacks for Tab 2
 # ==========================================
 @app.callback(
     [Output('fig2-openings', 'figure'), Output('fig2-salary', 'figure'),
@@ -253,8 +293,16 @@ def update_tab2(selected_role):
     d_open = df_openings if not selected_role else df_openings[df_openings['Role'] == selected_role]
     d_sal = df_salary if not selected_role else df_salary[df_salary['Role'] == selected_role]
     
+    if not selected_role:
+        # Aggregate skills and companies for overall view
+        d_skills = df_demand_skills.groupby('Skill')['Demand_Count'].mean().reset_index()
+        d_comp = df_companies.groupby('Company')['Open_Roles'].sum().reset_index()
+    else:
+        d_skills = df_demand_skills[df_demand_skills['Role'] == selected_role]
+        d_comp = df_companies[df_companies['Role'] == selected_role]
+    
     colors_line = ['#D4FF32', '#34D399', '#60A5FA']
-    fig_open = px.line(d_open, x='Year', y='Openings', color='Role', color_discrete_sequence=colors_line, title='Job Openings Over Time')
+    fig_open = px.line(d_open, x='Year', y='Openings', color='Role', custom_data=['Role'], color_discrete_sequence=colors_line, title='Job Openings Over Time')
     fig_open.update_traces(line_shape='spline', mode='lines+markers', marker=dict(size=8))
     fig_open.update_yaxes(tickformat=",.0f")
     
@@ -264,18 +312,18 @@ def update_tab2(selected_role):
     fig_sal.update_traces(marker_line_width=0, opacity=0.9)
     fig_sal.update_yaxes(tickformat="$,.0f")
     
-    fig_skills = px.bar(df_demand_skills.sort_values('Demand_Count', ascending=True), 
+    fig_skills = px.bar(d_skills.sort_values('Demand_Count', ascending=True), 
                         x='Demand_Count', y='Skill', orientation='h', color_discrete_sequence=['#8B5CF6'], title='Top Required Skills (% of Job Posts)')
     fig_skills.update_traces(marker_line_width=0, opacity=0.9)
                         
-    fig_comp = px.bar(df_companies.sort_values('Open_Roles', ascending=False), 
+    fig_comp = px.bar(d_comp.sort_values('Open_Roles', ascending=False), 
                       x='Company', y='Open_Roles', color_discrete_sequence=['#10B981'], title='Top Hiring Companies (Sample Vacancies)')
     fig_comp.update_traces(marker_line_width=0, opacity=0.9)
                       
     return apply_dark_theme(fig_open), apply_dark_theme(fig_sal), apply_dark_theme(fig_skills), apply_dark_theme(fig_comp)
 
 # ==========================================
-# 6. Callbacks/Figures for Tab 3
+# 7. Callbacks/Figures for Tab 3
 # ==========================================
 @app.callback(
     Output('fig3-radar', 'figure'),
